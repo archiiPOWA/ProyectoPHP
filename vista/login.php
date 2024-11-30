@@ -3,110 +3,132 @@
 error_reporting(0); // Desactivar mostrar errores en producción
 ini_set('display_errors', 0);
 
-// Función para registrar intentos de login
-function registrar_intento($usuario, $exitoso = false) {
-    include("../core/conexion.php");
-    
-    $ip = $_SERVER['REMOTE_ADDR'];
-    $sql = $exitoso 
-        ? "INSERT INTO login_intentos (email, ip, exitoso) VALUES (?, ?, 1)"
-        : "INSERT INTO login_intentos (email, ip, exitoso) VALUES (?, ?, 0)";
-    
-    $stmt = mysqli_prepare($conexion, $sql);
-    mysqli_stmt_bind_param($stmt, "ss", $usuario, $ip);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
-}
+// Archivo de configuración de base de datos
+require_once("../core/config.php");
 
-// Función para verificar intentos excedidos
-function intentos_excedidos($usuario) {
-    include("../core/conexion.php");
-    
-    $max_intentos = 3;
-    $tiempo_bloqueo = 15 * 60; // 15 minutos
-    
-    $sql = "SELECT COUNT(*) as intentos FROM login_intentos 
-            WHERE email = ? AND exitoso = 0 AND timestamp > DATE_SUB(NOW(), INTERVAL ? SECOND)";
-    
-    $stmt = mysqli_prepare($conexion, $sql);
-    mysqli_stmt_bind_param($stmt, "si", $usuario, $tiempo_bloqueo);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $row = mysqli_fetch_assoc($result);
-    
-    return $row['intentos'] >= $max_intentos;
-}
+// Clase de gestión de login
+class LoginManager {
+    private $conexion;
 
-// Procesamiento de login
-if (isset($_POST['Login'])) {
-    include("../core/conexion.php");
-
-    if (!$conexion) {
-        die("Error de conexión a la base de datos: " . mysqli_connect_error());
+    public function __construct($conexion) {
+        $this->conexion = $conexion;
     }
 
-    // Capturar y limpiar los datos de manera segura
-    $u = filter_var(mysqli_real_escape_string($conexion, $_POST['dueño']), FILTER_VALIDATE_EMAIL);
-    
-    if (!$u) {
-        header('Location: login.php?mensajee=Email inválido');
-        exit();
+    // Registrar intentos de login
+    private function registrarIntento($usuario, $exitoso = false) {
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $sql = $exitoso 
+            ? "INSERT INTO login_intentos (email, ip, exitoso, timestamp) VALUES (?, ?, 1, NOW())"
+            : "INSERT INTO login_intentos (email, ip, exitoso, timestamp) VALUES (?, ?, 0, NOW())";
+        
+        $stmt = mysqli_prepare($this->conexion, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $usuario, $ip);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
     }
 
     // Verificar intentos excedidos
-    if (intentos_excedidos($u)) {
-        header('Location: login.php?mensajee=Demasiados intentos. Espere 15 minutos');
-        exit();
-    }
-
-    // Consulta SQL preparada para obtener el hash de contraseña
-    $sql = "SELECT * FROM dueño WHERE EMAIL = ?";
-
-    $stmt = mysqli_prepare($conexion, $sql);
-
-    if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "s", $u);
+    private function intentosExcedidos($usuario) {
+        $max_intentos = 3;
+        $tiempo_bloqueo = 15 * 60; // 15 minutos
+        
+        $sql = "SELECT COUNT(*) as intentos FROM login_intentos 
+                WHERE email = ? AND exitoso = 0 AND timestamp > DATE_SUB(NOW(), INTERVAL ? SECOND)";
+        
+        $stmt = mysqli_prepare($this->conexion, $sql);
+        mysqli_stmt_bind_param($stmt, "si", $usuario, $tiempo_bloqueo);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
-        $rstlogin = mysqli_fetch_assoc($result);
+        $row = mysqli_fetch_assoc($result);
+        
+        return $row['intentos'] >= $max_intentos;
+    }
 
-        if ($rstlogin) {
-            // Verificar contraseña con password_verify
-            if (password_verify($_POST['clave'], $rstlogin['CLAVE'])) {
-                // Iniciar sesión de manera segura
-                session_start();
-                session_regenerate_id(true); // Prevenir secuestro de sesión
-
-                // Configurar variables de sesión
-                $_SESSION['dueño'] = $rstlogin['EMAIL'];
-                $_SESSION['IDdueño'] = $rstlogin['ID_ADOPTA'];
-                $_SESSION['Nombre'] = $rstlogin['NOMBRE'];
-                $_SESSION['is_logged'] = 1;
-
-                // Registrar intento exitoso
-                registrar_intento($u, true);
-
-                header('Location: index.php');
-                exit();
-            } else {
-                // Contraseña incorrecta
-                registrar_intento($u);
-                header('Location: login.php?mensajee=Email o Contraseña Incorrectos');
-                exit();
-            }
-        } else {
-            // Usuario no encontrado
-            header('Location: login.php?mensajee=Usuario no encontrado');
-            exit();
+    // Validar credenciales
+    public function validarLogin($email, $clave) {
+        // Validar formato de email
+        $email = filter_var($email, FILTER_VALIDATE_EMAIL);
+        if (!$email) {
+            return ['success' => false, 'message' => 'Email inválido'];
         }
 
-        mysqli_stmt_close($stmt);
+        // Verificar intentos excedidos
+        if ($this->intentosExcedidos($email)) {
+            return ['success' => false, 'message' => 'Demasiados intentos. Espere 15 minutos'];
+        }
+
+        // Consulta preparada
+        $sql = "SELECT * FROM dueño WHERE EMAIL = ?";
+        $stmt = mysqli_prepare($this->conexion, $sql);
+
+        if (!$stmt) {
+            return ['success' => false, 'message' => 'Error interno de consulta'];
+        }
+
+        mysqli_stmt_bind_param($stmt, "s", $email);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $usuario = mysqli_fetch_assoc($result);
+
+        if (!$usuario) {
+            $this->registrarIntento($email);
+            return ['success' => false, 'message' => 'Usuario no encontrado'];
+        }
+
+        // Verificar contraseña
+        if (password_verify($clave, $usuario['CLAVE'])) {
+            // Inicio de sesión exitoso
+            $this->registrarIntento($email, true);
+            return [
+                'success' => true, 
+                'usuario' => [
+                    'email' => $usuario['EMAIL'],
+                    'id' => $usuario['ID_ADOPTA'],
+                    'nombre' => $usuario['NOMBRE']
+                ]
+            ];
+        } else {
+            // Contraseña incorrecta
+            $this->registrarIntento($email);
+            return ['success' => false, 'message' => 'Contraseña incorrecta'];
+        }
+    }
+
+    // Iniciar sesión
+    public function iniciarSesion($usuario) {
+        session_start();
+        session_regenerate_id(true);
+
+        $_SESSION['dueño'] = $usuario['email'];
+        $_SESSION['IDdueño'] = $usuario['id'];
+        $_SESSION['Nombre'] = $usuario['nombre'];
+        $_SESSION['is_logged'] = 1;
+    }
+}
+
+// Procesamiento del formulario
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['Login'])) {
+    // Incluir conexión a la base de datos
+    require_once("../core/conexion.php");
+
+    // Crear instancia de LoginManager
+    $loginManager = new LoginManager($conexion);
+
+    // Intentar login
+    $resultado = $loginManager->validarLogin($_POST['dueño'], $_POST['clave']);
+
+    if ($resultado['success']) {
+        // Login exitoso
+        $loginManager->iniciarSesion($resultado['usuario']);
+        header('Location: index.php');
+        exit();
     } else {
-        // Error en preparación de consulta
-        header('Location: login.php?mensajee=Error interno');
+        // Login fallido
+        header('Location: login.php?mensajee=' . urlencode($resultado['message']));
         exit();
     }
 
+    // Cerrar conexión
     mysqli_close($conexion);
 }
 ?>
@@ -126,49 +148,73 @@ if (isset($_POST['Login'])) {
     <header>
         <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" href="index.html"></a>
+                <a class="navbar-brand" href="index.html">Sistema de Login</a>
             </div>
         </nav>
     </header>
-    <main>
-        <section id="serOrador" class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-7 col-xl-8">
-                    <?php 
-                    // Mostrar mensajes de error
-                    if(isset($_GET['mensajee'])) {
-                        echo '<div class="alert alert-danger">' . htmlspecialchars($_GET['mensajee']) . '</div>';
-                    }
-                    ?>
-                    <h2 class="text-center">LOGIN</h2>
-                    <form action="login.php" method="post" enctype="multipart/form-data" name="contact-form">
-                        <div class="row gx-2">
-                            <div class="form-floating col-md mb-3">
-                                <input name="dueño" id="nombreOrador" type="email" class="form-control" placeholder="Email" aria-label="Email" required>
-                                <label for="nombreOrador">Email</label>
+    
+    <main class="container mt-5 pt-5">
+        <section id="loginSection" class="row justify-content-center">
+            <div class="col-lg-5">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h2>Iniciar Sesión</h2>
+                    </div>
+                    <div class="card-body">
+                        <?php 
+                        // Mostrar mensajes de error
+                        if(isset($_GET['mensajee'])) {
+                            echo '<div class="alert alert-danger text-center">' . 
+                                 htmlspecialchars($_GET['mensajee']) . 
+                                 '</div>';
+                        }
+                        ?>
+                        <form action="login.php" method="post" name="loginForm">
+                            <div class="form-floating mb-3">
+                                <input 
+                                    type="email" 
+                                    class="form-control" 
+                                    id="floatingInput" 
+                                    name="dueño" 
+                                    placeholder="nombre@ejemplo.com" 
+                                    required
+                                >
+                                <label for="floatingInput">Correo Electrónico</label>
                             </div>
-                        </div>
-                        <div class="row gx-2">
-                            <div class="form-floating col-md mb-3">
-                                <input name="clave" id="correoOrador" type="password" class="form-control" placeholder="Contraseña" aria-label="Contraseña" required>
-                                <label for="correoOrador">Contraseña</label>
+                            <div class="form-floating mb-3">
+                                <input 
+                                    type="password" 
+                                    class="form-control" 
+                                    id="floatingPassword" 
+                                    name="clave" 
+                                    placeholder="Contraseña" 
+                                    required
+                                >
+                                <label for="floatingPassword">Contraseña</label>
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col mb-3">
-                                <div class="d-grid">
-                                    <button type="submit" name="Login" class="btn btn-success btn-lg btn-form">Ingresar</button>
-                                </div>
+                            
+                            <div class="d-grid">
+                                <button 
+                                    type="submit" 
+                                    name="Login" 
+                                    class="btn btn-primary btn-lg"
+                                >
+                                    Iniciar Sesión
+                                </button>
                             </div>
-                        </div>
-                    </form>
-                    <a href="index.php">Volver</a>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="recuperar-clave.php" class="text-muted">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="index.php" class="btn btn-link">Volver al Inicio</a>
                 </div>
             </div>
         </section>
     </main>
-    <footer></footer>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
