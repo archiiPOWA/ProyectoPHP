@@ -4,7 +4,7 @@ error_reporting(0); // Desactivar mostrar errores en producción
 ini_set('display_errors', 0);
 
 // Archivo de configuración de base de datos
-require_once("../core/config.php");
+require_once("../core/conexion.php");
 
 // Clase de gestión de login
 class LoginManager {
