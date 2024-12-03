@@ -1,0 +1,120 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* 100% of the viewport height */
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+}
+
+.form-container {
+    width: 300px; /* Adjust this value to make the container larger or smaller */
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    text-align: center; /* Center text inside the container */
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-container h2 {
+    margin-top: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+label {
+    text-align: left;
+    padding-left: 10px;
+    margin-bottom: 5px; 
+    font-weight: bold;
+    color: #555;
+}
+
+.form-container input.mod {
+    width: calc(100% - 20px); 
+    padding: 10px;
+    margin: 10px auto; 
+    display: block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; 
+}
+
+
+.form-container button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.form-container button[type="submit"] {
+    background-color: #286994;
+    color: white;
+}
+
+.form-container button[type="reset"] {
+    background-color: #dc3545;
+    color: white;
+}
+
+ .mod, select, textarea {
+   
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    width: 100%;
+}
+
+textarea {
+    resize: vertical;
+    
+}
+
+fieldset {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    
+}
+
+legend {
+    font-weight: bold;
+    color: #555;
+    display: flex;
+  }
+
+button {
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+button[type="submit"] {
+    background-color: #28a745;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+button[type="reset"] {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+button:hover {
+    opacity: 0.9;
+}

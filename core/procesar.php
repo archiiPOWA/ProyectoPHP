@@ -1,12 +1,13 @@
 <?php
-include("../core/conexion.php");
-session_name('back');
+include("../vista/conectar.php");
+
 session_start();
 
-// Validar sesión
-if (!isset($_SESSION['is_logged']) || $_SESSION['is_logged'] !== 1) {
-    header('location: login.php?mensaje=Sesión no válida');
-    exit;
+// Verifica el usuario
+if (!isset($_SESSION['usuario'])) {
+    // Redirige al inicio de sesión si no está autenticado
+    header("Location: index.php");
+    exit();
 }
 
 // Procesar acciones
@@ -16,6 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     switch($accion) {
         case 'btnAgregar':
             agregarAdopcion($conexion);
+            header('location: ../vista/registros.php');
             break;
         case 'btnModificar':
             modificarAdopcion($conexion);
@@ -54,17 +56,19 @@ function agregarAdopcion($conexion) {
         }
 
         // Consultas preparadas para prevenir inyección SQL
-        $sql_adopta = "INSERT INTO adoptantes (ID_ADOPTA, DNI, APELLIDO, NOMBRE, FECHA_ADOPCION, EMAIL) 
+        $sql_adopta = "INSERT INTO dueño (ID_ADOPTA, DNI, APELLIDO, NOMBRE, FECHA_ADOPCION, EMAIL) 
                        VALUES (?, ?, ?, ?, ?, ?)";
         $stmt_adopta = $conexion->prepare($sql_adopta);
         $stmt_adopta->bind_param("isssss", $id_adopta, $dni, $apellido, $nombre, $fecha_adopcion, $email);
         $stmt_adopta->execute();
 
-        $sql_perro = "INSERT INTO perros (ID_PERRO, FECHA_INGRESO, COLOR, ESTADO) 
+        $sql_perro = "INSERT INTO perro (ID_PERRO, FECHA_INGRESO, COLOR, ESTADO) 
                       VALUES (?, ?, ?, ?)";
         $stmt_perro = $conexion->prepare($sql_perro);
         $stmt_perro->bind_param("isss", $id_perro, $fecha_ingreso, $color, $estado);
         $stmt_perro->execute();
+
+        
 
         header('location: index.php?mensaje=Adopción agregada exitosamente');
     } catch (Exception $e) {
