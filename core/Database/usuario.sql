@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 04-12-2024 a las 12:43:42
+-- Tiempo de generación: 03-12-2024 a las 20:45:15
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -58,7 +58,7 @@ INSERT INTO `dueño` (`ID_ADOPTA`, `DNI`, `APELLIDO`, `NOMBRE`, `FECHA_ADOPCION`
 (0, '2239613', 'OJEDA', 'JUAN CARLOS', '2024-11-14', 'TARAGUI@GMAIL.COM', ''),
 (1, '100', 'VALENZUEL', 'DAVID', '2024-11-07', 'RODOCROCITA@GMAIL.COM', ''),
 (2, '26396138', 'ROMERO', 'ARIEL FABIAN', '2024-11-14', 'ROMERO@GMAIL.COM', ''),
-(6, '29463394', 'Gonzalez', 'Mauricio', '2024-12-03', 'mauricio2@mail.com', '');
+(5, '2946339', 'Gonzalez', 'Mauricio', '2024-12-24', 'mauricio@mail.com', '');
 
 -- --------------------------------------------------------
 
@@ -70,22 +70,16 @@ CREATE TABLE `perro` (
   `ID_PERRO` int(100) NOT NULL,
   `FECHA_INGRESO` date NOT NULL,
   `COLOR` text NOT NULL,
-  `FECHA_ADOPCION` date NOT NULL,
-  `ESTADO` enum('DISPONIBLE','ADOPTADO','','') NOT NULL DEFAULT 'DISPONIBLE'
+  `FECHA _ADOPCION` date NOT NULL,
+  `ESTADO` enum('DISPONIBLE', 'ADOPTADO', '', '') NOT NULL DEFAULT 'ADOPTADO'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `perro`
 --
 
-INSERT INTO `perro` (`ID_PERRO`, `FECHA_INGRESO`, `COLOR`, `FECHA_ADOPCION`, `ESTADO`) VALUES
-(25, '2024-12-25', 'negro', '2024-12-03', 'DISPONIBLE'),
-(56, '2024-12-04', 'blanco', '2024-12-04', 'DISPONIBLE'),
-(58, '2024-12-04', 'blanco', '2024-12-04', 'DISPONIBLE'),
-(400, '2024-12-03', 'gris', '0000-00-00', 'DISPONIBLE'),
-(600, '2024-12-02', 'VERDE', '0000-00-00', 'DISPONIBLE'),
-(777, '2024-12-02', 'gris', '0000-00-00', 'DISPONIBLE'),
-(999, '2024-12-02', 'marron', '0000-00-00', 'DISPONIBLE');
+INSERT INTO `perro` (`ID_PERRO`, `FECHA_INGRESO`, `COLOR`, `FECHA _ADOPCION`, `ESTADO`) VALUES
+(25, '2024-12-25', 'negro', '0000-00-00', '');
 
 -- --------------------------------------------------------
 
@@ -129,7 +123,8 @@ ALTER TABLE `dueño`
 -- Indices de la tabla `perro`
 --
 ALTER TABLE `perro`
-  ADD PRIMARY KEY (`ID_PERRO`);
+  ADD PRIMARY KEY (`ID_PERRO`),
+  ADD UNIQUE KEY `FECHA _ADOPCION` (`FECHA _ADOPCION`);
 
 --
 -- Indices de la tabla `usuarios`
@@ -157,7 +152,7 @@ ALTER TABLE `dueño`
 -- AUTO_INCREMENT de la tabla `perro`
 --
 ALTER TABLE `perro`
-  MODIFY `ID_PERRO` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1000;
+  MODIFY `ID_PERRO` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
