@@ -90,6 +90,14 @@ $conexion->close();
 
 </head>
 <body>
+
+<?php
+include 'navbar.php';
+?>
+
+
+
+
 <div class="mb-3">
     <h1>Editar Dueño</h1>
     <form method="POST" action="editar_dueño.php">

@@ -48,12 +48,15 @@ function agregarAdopcion($conexion) {
         $id_perro = $_POST['txtID_PERRO'];
         $fecha_ingreso = $_POST['txtFECHA_INGRESO'];
         $color = $_POST['txtCOLOR'];
-        $estado = $_POST['txtESTADP'];
+        $estado = $_POST['txtESTADO'];
 
         // Validaciones básicas
-        if(empty($id_adopta) || empty($dni) || empty($apellido)) {
-            throw new Exception("Datos incompletos");
+        if (empty($id_perro) || empty($fecha_ingreso) || empty($color) || empty($estado)) {
+            throw new Exception("Todos los campos son requeridos.");
         }
+        
+
+        
 
         // Consultas preparadas para prevenir inyección SQL
         $sql_adopta = "INSERT INTO dueño (ID_ADOPTA, DNI, APELLIDO, NOMBRE, FECHA_ADOPCION, EMAIL) 
@@ -65,11 +68,8 @@ function agregarAdopcion($conexion) {
         $sql_perro = "INSERT INTO perro (ID_PERRO, FECHA_INGRESO, COLOR, ESTADO) 
                       VALUES (?, ?, ?, ?)";
         $stmt_perro = $conexion->prepare($sql_perro);
-        $stmt_perro->bind_param("isss", $id_perro, $fecha_ingreso, $color, $estado);
+        $stmt_perro->bind_param("ssss", $id_perro, $fecha_ingreso, $color, $estado);
         $stmt_perro->execute();
-
-        
-
         header('location: index.php?mensaje=Adopción agregada exitosamente');
     } catch (Exception $e) {
         header('location: index.php?error=' . urlencode($e->getMessage()));

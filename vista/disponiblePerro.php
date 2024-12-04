@@ -13,7 +13,7 @@ if ($conexion->connect_error) {
 }
 
 // Consulta para obtener los datos de la tabla 'dueño'
-$sql = "SELECT ID_ADOPTA, DNI, APELLIDO, NOMBRE, FECHA_ADOPCION, EMAIL FROM dueño";
+$sql = "SELECT ID_PERRO, FECHA_INGRESO, COLOR, FECHA_ADOPCION, ESTADO FROM perro";
 $result = $conexion->query($sql);
 ?>
 
@@ -23,7 +23,6 @@ $result = $conexion->query($sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adoptantes </title>
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
@@ -68,50 +67,48 @@ $result = $conexion->query($sql);
 
 <?php
 include 'navbar.php';
-?>
+    ?>
 
-    <h3>Registro Actualizado de Adoptantes</h3>
-    <a href="vista.php" class="btn btn-success">Agregar Adoptante</a>
+   <h3>Perros Disponibles para Adopción</h3>
+    <a href="agregarPerro.php" class="btn btn-success">Agregar Nuevo Perro</a>
 
-<div class="mb-3">
+    <div class="mb-3">
     <?php if ($result && $result->num_rows > 0): ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>DNI</th>
-                    <th>Apellido</th>
-                    <th>Nombre</th>
-                    <th>Fecha de Adopción</th>
-                    <th>Email</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha de Ingreso</th>
+                <th>Color</th>
+                <th>Fecha de Adopción</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <tr>
-                        <td><?= $row['ID_ADOPTA'] ?></td>
-                        <td><?= $row['DNI'] ?></td>
-                        <td><?= $row['APELLIDO'] ?></td>
-                        <td><?= $row['NOMBRE'] ?></td>
+                        <td><?= $row['ID_PERRO'] ?></td>
+                        <td><?= $row['FECHA_INGRESO'] ?></td>
+                        <td><?= $row['COLOR'] ?></td>
                         <td><?= $row['FECHA_ADOPCION'] ?></td>
-                        <td><?= $row['EMAIL'] ?></td>
+                        <td><?= $row['ESTADO'] ?></td>
+                        
                         <td>
-                            <a href="editar_dueño.php?id=<?= $row['ID_ADOPTA'] ?>" class="btn">Editar</a>
-                            <a href="eliminar_dueño.php?id=<?= $row['ID_ADOPTA'] ?>" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar este registro?')">Eliminar</a>
+                            <!-- <a href="editar_perro.php?id=<?= $row['ID_PERRO'] ?>" class="btn">Editar</a> -->
+                            <a href="eliminarPerro.php?id=<?= $row['ID_PERRO'] ?>" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar este registro?')">Eliminar</a>
                         </td>
                     </tr>
                 <?php endwhile; ?>
             </tbody>
-        </table>
+        
+    </table>
     <?php else: ?>
         <p>No se encontraron registros en la tabla.</p>
     <?php endif; ?>
 
     <?php $conexion->close(); ?>
-</div>
-
-       
 </body>
 </html>
 
