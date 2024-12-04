@@ -31,7 +31,7 @@ La información se almacena en una base de datos gestionada con **PHPMyAdmin**.
 ## Tecnologías Utilizadas
 - **Lenguaje de Programación**: PHP
 - **Base de Datos**: MySQL (administrada con PHPMyAdmin)
-- **Frontend**: HTML, CSS, JavaScript
+- **Frontend**: HTML, CSS, 
 - **Servidor Local**: XAMPP o WAMP
 
 ---
