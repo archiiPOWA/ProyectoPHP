@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Adopciones</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
@@ -31,6 +32,34 @@
 </head>
 
 <body>
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">El Refugio.</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="principal.php">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="registros.php">Adoptantes</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="disponiblePerro">Disponibles</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" aria-disabled="true" href="logout.php">Cerrar Sesión</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+
     <div class="form-container">
         <h1 class="text-center mb-4">Gestión de Adopciones</h1>
 
@@ -89,14 +118,14 @@
                 <input type="text" name="txtCOLOR" id="txtCOLOR" class="form-control" required>
             </div>
             <div class="mb-3">
-                <label for="txtESTADP" class="form-label">Estado:</label>
-                <select name="txtESTADP" id="txtESTADP" class="form-control" required>
-                    <option value="Disponible">Disponible</option>
-                    <option value="Adoptado">Adoptado</option>
+                <label for="txtESTADO" class="form-label">Estado:</label>
+                <select name="txtESTADO" id="txtESTADO" class="form-control" required>
+                    <option value="DISPONIBLE">Disponible</option>
+                    <option value="ADOPTADO">Adoptado</option>
                 </select>
             </div>
 
-            <h3>Datos de Adopción</h3>
+            <!-- <h3>Datos de Adopción</h3>
             <div class="mb-3">
                 <label for="txtID_ADOPCION" class="form-label">ID Adopción:</label>
                 <input type="text" name="txtID_ADOPCION" id="txtID_ADOPCION" class="form-control" required>
@@ -104,7 +133,7 @@
             <div class="mb-3">
                 <label for="txtID_USUARIO" class="form-label">ID Usuario:</label>
                 <input type="text" name="txtID_USUARIO" id="txtID_USUARIO" class="form-control" required>
-            </div>
+            </div> -->
 
             <div class="d-flex justify-content-between">
                 <button type="submit" name="accion" value="btnAgregar" class="btn btn-success">Agregar</button>
@@ -114,6 +143,7 @@
             </div>
         </form>
     </div>
+
 </body>
 
 </html>
